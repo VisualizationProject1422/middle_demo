@@ -176,19 +176,19 @@ body {
     text-align: left;
 }
 
-p {
+#middlePart p {
     color: black;
     font-size: 0.8em;
     line-height: 1.3em;
 }
 
-#sendbutton {
+#middlePart #sendbutton {
     position: absolute;
     top: 650px;
     left: 430px;
 }
 
-.button {
+#middlePart .button {
     border: none;
     color: white;
     padding: 15px 32px;
@@ -201,7 +201,7 @@ p {
     display: none;
 }
 
-.block {
+#middlePart .block {
     width: 100px;
     position: relative;
     clear: both;
@@ -209,7 +209,7 @@ p {
     float: left;
 }
 
-label {
+#middlePart label {
     left: 435px;
     top: 5px;
     width: 50px;
@@ -223,15 +223,15 @@ label {
     transition: .3s ease;
 }
 
-input[type=checkbox]:checked+label {
+#middlePart input[type=checkbox]:checked+label {
     background: #55e868;
 }
 
-input[type=checkbox]:checked+label:before {
+#middlePart input[type=checkbox]:checked+label:before {
     left: 25px;
 }
 
-label:before {
+#middlePart label:before {
     transition: .3s ease;
     content: '';
     width: 20px;
