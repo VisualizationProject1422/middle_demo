@@ -7,8 +7,9 @@ var choose_list = ['江西省'];
 var choose_geo = [];
 var choose_time = [];
 var layer_geo = 'province';
-var layer_time = 'day';
+var layer_time = 0;
 var mapIndex = 1;
+var year_current = '2013';
 
 function rank(value) {
     if (value > 300) {
@@ -31,31 +32,6 @@ function rank(value) {
     }
     return r;
 }
-// function draw(cite,aqi){
-//     var bmap = chart_map.getModel().getComponent('bmap').getBMap();
-//     var bdary = new BMap.Boundary();
-//     bdary.get(cite, function (rs) {       //获取行政区域     //清除地图覆盖物       
-//         var count = rs.boundaries.length; //行政区域的点有多少个
-//         if (count === 0) {
-//             console.log(cite);
-//             return;
-//         }
-//         for (var i = 0; i < count; i++) {
-//             var ply = new BMap.Polygon(rs.boundaries[i], { strokeWeight: 2, strokeColor: '#F6EFA6' }); //建立多边形覆
-//             bmap.addOverlay(ply);  //添加覆盖物
-//             ply['name'] = cite
-//             ply.addEventListener('click',function(param){
-//                 console.log(ply.name);
-//             })
-//         }
-//     });
-// }
-// function getCoord() {
-//     var bmap = chart_map.getModel().getComponent('bmap').getBMap();
-//     var sw = bmap.getBounds().getSouthWest();
-//     var ne = bmap.getBounds().getNorthEast();
-//     return [[sw.lng, ne.lat], [ne.lng, sw.lat]];
-// }
 
 function MapSetUp(map, year) {
     var data = { 'layer_geo': layer_geo, 'year': year, 'children': [] };
@@ -138,7 +114,6 @@ function TimelineSetUp() {
     switch (layer_geo) {
         case 'province':
             var data = { 'layer_geo': layer_geo, 'prov': choose_list[0] };
-            console.log(data);
             $.ajax({
                 url: "./TimelineSetUp",
                 type: "POST",
@@ -167,7 +142,7 @@ function TimelineSetUp() {
 
                 }
             });
-            CalenderSetUp('2013');
+            CalenderSetUp(year_current);
             break;
         case 'city':
             var data = { 'layer_geo': layer_geo, 'city': choose_list[0] };
@@ -199,7 +174,7 @@ function TimelineSetUp() {
 
                 }
             });
-            CalenderSetUp('2013');
+            CalenderSetUp(year_current);
             break;
         default:
             break;
@@ -251,9 +226,6 @@ function mapInit() {
         echarts.registerMap("china", map);
         data_map = map;
         option_map = {
-            title: {
-                text: '中国污染分布情况',
-            },
             tooltip: {},
             visualMap: {
                 pieces: [
@@ -421,6 +393,7 @@ function mapInit() {
                 tooltip: {
                     position: 'top',
                     formatter: function (params) {
+                        console.log(params);
                         var aqi = Math.round(params.data.value);
                         var pm2_5 = Math.round(params.data.PM2_5);
                         var pm10 = Math.round(params.data.PM10);
@@ -447,12 +420,13 @@ function mapInit() {
             chart_map.setOption(option_map);
         }
         MapSetUp(map, '2013');
+        year_current = '2013';
         layer_geo = 'province';
     });
 }
 
 function WindSetUp(date) {
-    $.get('./static/innerData/wind/' + date.slice(0,8) + '.json').done(function (data) {
+    $.get('./static/innerData/wind/' + date.slice(0, 8) + '.json').done(function (data) {
         var wind_data = []
         var maxMag = 0
         var minMag = Infinity
@@ -656,12 +630,36 @@ function WindSetUp(date) {
 function pushtext2(list) {
     i = 0
     p = '选择时间 ：'
-    while (i < list.length) {
-        t = list[i];
-        p += t.slice(0,4) + '-' + t.slice(4,6) + '-' + t.slice(6,8) + ' ';
-        i++;
+    switch (layer_time) {
+        case 'day':
+            while (i < list.length) {
+                t = list[i];
+                p += t.slice(0, 4) + '-' + t.slice(4, 6) + '-' + t.slice(6, 8) + ' ';
+                i++;
+            }
+            document.getElementById('p_time').innerHTML = p;
+            break;
+        case 'year':
+            while (i < list.length) {
+                t = list[i];
+                p += t + ' ';
+                i++;
+            }
+            document.getElementById('p_time').innerHTML = p;
+            break;
+        case 'month':
+            while (i < list.length) {
+                t = list[i];
+                p += t.slice(0, 4) + '-' + t.slice(4, 6) + ' ';
+                i++;
+            }
+            document.getElementById('p_time').innerHTML = p;
+            break;
+        default:
+            document.getElementById('p_time').innerHTML = p;
+            break;
     }
-    document.getElementById('p_time').innerHTML = p;
+
     return 1;
 }
 
@@ -695,6 +693,7 @@ function bt1() {
 $("#clear").click(function () {
     choose_geo = [];
     choose_time = [];
+    layer_time = 0;
     pushtext1(choose_geo);
-    pushtext2(choose_geo);
+    pushtext2(choose_time);
 })

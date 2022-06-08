@@ -59,13 +59,17 @@ option_timeline = {
         },
         dayLabel: {
             show: true,
-            fontSize: 6
+            fontSize: 6,
+            firstDay: 1, // 从周一开始
+            nameMap: 'ZH'
+
         },
         monthLabel: {
             show: true,
-            fontSize: 8
+            fontSize: 8,
+            nameMap: 'ZH'
         },
-        yearLabel: { show: true },
+        yearLabel: { show: false },
     },
     series: [
         {
@@ -94,11 +98,6 @@ option_timeline = {
 };
 
 option_themeriver = {
-
-    title: {
-        text: '城市污染等级比例统计图',
-        right: 10
-    },
     color: ["#1a9850", "#91cf60", "#d9ef8b", "#fee08b", "#fc8d59", "#d73027"],
     dataZoom: {
         id: 'dataZoomX',
@@ -174,8 +173,14 @@ mapInit();
 
 
 chart_map.on('click', function (param) {
+
     choose_list[0] = param.name;
-    TimelineSetUp();
+    if (layer_geo == 'province') {
+        TimelineSetUp();
+    }
+    else {
+        CalenderSetUp();
+    }
     if (choose_geo.indexOf(param.name) == -1) {
         choose_geo.push(param.name);
         pushtext1(choose_geo);
@@ -184,42 +189,42 @@ chart_map.on('click', function (param) {
         choose_geo.pop(param.name);
         pushtext1(choose_geo);
     }
-    
-
 });
+
 chart_map.on('dblclick', function (param) {
     temp_adcode = getAdcode(param.name);
     layer_geo = 'city';
     $.get('https://geo.datav.aliyun.com/areas_v3/bound/' + temp_adcode + '_full.json').done(function (map) {  //读取json文件
-        console.log(map);
         data_map = map;
         echarts.registerMap(param.name, map);
         chart_map.setOption({
-            title: {
-                text: param.name + '污染分布情况'
-            },
             series: {
                 map: param.name,
                 top: 40,
                 zoom: 1,
             },
         });
-        MapSetUp(map, '2013');
+        MapSetUp(map, year_current);
         layer_geo = 'city';
     });
 
 });
 
-chart_timeline.on('click', function (param) {
+chart_timeline.on('click', { seriesIndex: 2 }, function (param) {
     console.log(param);
-    if (param.seriesIndex == 2) {
-        CalenderSetUp(param.data[0].toString());
-        MapSetUp(data_map, param.data[0].toString());
-    };
-    if (param.seriesIndex == 0) {
-        console.log(param.data[0])
-        var time = +echarts.number.parseDate(param.data[0]);
-        date_2 = echarts.format.formatTime('yyyyMMdd00', time)
+    year_current = param.data[0].toString();
+    CalenderSetUp(param.data[0].toString());
+    MapSetUp(data_map, param.data[0].toString());
+});
+chart_timeline.on('click', { seriesIndex: 0 }, function (param) {
+    var time = +echarts.number.parseDate(param.data[0]);
+    date_2 = echarts.format.formatTime('yyyyMMdd00', time)
+    if (!choose_time[0]) {
+        layer_time = 'day'
+        choose_time.push(date_2);
+        pushtext2(choose_time);
+    }
+    else if (layer_time == 'day') {
         if (choose_time.indexOf(date_2) == -1) {
             choose_time.push(date_2);
             pushtext2(choose_time);
@@ -228,13 +233,82 @@ chart_timeline.on('click', function (param) {
             choose_time.pop(date_2);
             pushtext2(choose_time);
         }
-        if (mapIndex == 2) {
-            WindSetUp(date_2);
-        }
+    }
+    if (mapIndex == 2) {
+        WindSetUp(date_2);
     }
 });
+chart_timeline.getZr().on('click', function (param) {
+    console.log(param)
+    if (param.target) {
+        if (param.target.style.text) {
+            temp = param.target.style.text;
+            switch (temp.length) {
+                case 3:
+                    t = year_current + temp.slice(0, 2)
+                    if (!choose_time[0]) {
+                        layer_time = 'month'
+                        choose_time.push(t);
+                        pushtext2(choose_time);
+                    }
+                    else if (layer_time == 'month') {
+                        if (choose_time.indexOf(t) == -1) {
+                            choose_time.push(t);
+                            pushtext2(choose_time);
+                        }
+                        else {
+                            choose_time.pop(t);
+                            pushtext2(choose_time);
+                        }
+                    }
+                    break;
+                case 2:
+                    t = year_current + '0' + temp.slice(0, 1)
+                    if (!choose_time[0]) {
+                        layer_time = 'month'
+                        choose_time.push(t);
+                        pushtext2(choose_time);
+                    }
+                    else if (layer_time == 'month') {
+                        if (choose_time.indexOf(t) == -1) {
+                            choose_time.push(t);
+                            pushtext2(choose_time);
+                        }
+                        else {
+                            choose_time.pop(t);
+                            pushtext2(choose_time);
+                        }
+                    }
+                    break;
+                case 4:
+                    console.log('tosee')
+                    console.log(choose_time)
+                    if (!choose_time[0]) {
+                        layer_time = 'year'
+                        choose_time.push(temp);
+                        pushtext2(choose_time);
+                    }
+                    else if (layer_time == 'year') {
+                        if (choose_time.indexOf(temp) == -1) {
+                            choose_time.push(temp);
+                            pushtext2(choose_time);
+                        }
+                        else {
+                            choose_time.pop(temp);
+                            pushtext2(choose_time);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+})
 
 chart_map.getZr().on('click', function (event) {
+    console.log(event)
     // 没有 target 意味着鼠标/指针不在任何一个图形元素上，它是从“空白处”触发的。
     if (!event.target && layer_geo == 'city') {
         layer_geo = 'province';

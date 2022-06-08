@@ -6,14 +6,13 @@ app = Flask(__name__)
 
 
 def getProvDate(prov,date):
-    with open('.\static\innerData\province_AQI_IAQI\day\\'+date+'00.csv', encoding= 'utf-8') as f:
+    with open('./static/innerData/province_AQI_IAQI/day/'+date+'00.csv', encoding= 'utf-8') as f:
         f_csv = csv.DictReader(f)
         for row in f_csv:
             if row['province'] == prov:
-
                 return(row['AQI'])
 def getCityDate(city,date):
-    with open('.\static\innerData\city_AQI_IAQI\day\\'+date+'00.csv', encoding= 'utf-8') as f:
+    with open('./static/innerData/city_AQI_IAQI/day/'+date+'00.csv', encoding= 'utf-8') as f:
         f_csv = csv.DictReader(f)
         for row in f_csv:
             if row['city'] == city:
@@ -29,7 +28,7 @@ def getProv(prov):
     o3 =[]
     while i in range(6):
         year = str(2013 + i)
-        with open('.\static\innerData\province_AQI_IAQI\year\\'+year+'.csv', encoding= 'utf-8') as f:
+        with open('./static/innerData/province_AQI_IAQI/year/'+year+'.csv', encoding= 'utf-8') as f:
             f_csv = csv.DictReader(f)
             for row in f_csv:
                 if row['province'] == prov:
@@ -56,7 +55,7 @@ def getCity(city):
     o3 =[]
     while i in range(6):
         year = str(2013 + i)
-        with open('.\static\innerData\city_AQI_IAQI\year\\'+year+'.csv', encoding= 'utf-8') as f:
+        with open('./static/innerData/city_AQI_IAQI/year/'+year+'.csv', encoding= 'utf-8') as f:
             f_csv = csv.DictReader(f)
             for row in f_csv:
                 if row['city'] == city:
